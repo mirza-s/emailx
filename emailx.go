@@ -1,6 +1,7 @@
 package emailx
 
 import (
+	"context"
 	"errors"
 	"net"
 	"regexp"
@@ -8,19 +9,22 @@ import (
 )
 
 var (
-	ErrInvalidFormat    = errors.New("invalid format")
+	// ErrInvalidFormat error
+	ErrInvalidFormat = errors.New("invalid format")
+	// ErrUnresolvableHost error
 	ErrUnresolvableHost = errors.New("unresolvable host")
 
 	userRegexp = regexp.MustCompile("^[a-zA-Z0-9!#$%&'*+/=?^_`{|}~.-]+$")
 	hostRegexp = regexp.MustCompile("^[^\\s]+\\.[^\\s]+$")
 
 	// As per RFC 5332 secion 3.2.3: https://tools.ietf.org/html/rfc5322#section-3.2.3
-	// Dots are not allowed in the beginning, end or in occurances of more than 1 in the email address
+	// Dots are not allowed in the beginning, end or in occurrences of more than 1 in the email address
 	userDotRegexp = regexp.MustCompile("(^[.]{1})|([.]{1}$)|([.]{2,})")
 )
 
-// Validate checks format of a given email and resolves its host name.
-func Validate(email string) (err error) {
+// ValidateWithContext checks format of a given email and resolves its host name.
+// Context can be used for cancellation
+func ValidateWithContext(ctx context.Context, email string) (err error) {
 	err = ValidateFast(email)
 	if err != nil {
 		return err
@@ -34,8 +38,10 @@ func Validate(email string) (err error) {
 		return nil
 	}
 
-	if _, err := net.LookupMX(host); err != nil {
-		if _, err := net.LookupIP(host); err != nil {
+	var resolver net.Resolver
+
+	if _, err := resolver.LookupMX(ctx, host); err != nil {
+		if _, err := resolver.LookupIPAddr(ctx, host); err != nil {
 			// Only fail if both MX and A records are missing - any of the
 			// two is enough for an email to be deliverable
 			return ErrUnresolvableHost
@@ -43,6 +49,11 @@ func Validate(email string) (err error) {
 	}
 
 	return nil
+}
+
+// Validate checks format of a given email and resolves its host name.
+func Validate(email string) (err error) {
+	return ValidateWithContext(context.Background(), email)
 }
 
 // ValidateFast checks format of a given email.
