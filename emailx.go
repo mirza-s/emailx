@@ -13,31 +13,21 @@ var (
 
 	userRegexp = regexp.MustCompile("^[a-zA-Z0-9!#$%&'*+/=?^_`{|}~.-]+$")
 	hostRegexp = regexp.MustCompile("^[^\\s]+\\.[^\\s]+$")
+
 	// As per RFC 5332 secion 3.2.3: https://tools.ietf.org/html/rfc5322#section-3.2.3
 	// Dots are not allowed in the beginning, end or in occurances of more than 1 in the email address
 	userDotRegexp = regexp.MustCompile("(^[.]{1})|([.]{1}$)|([.]{2,})")
 )
 
 // Validate checks format of a given email and resolves its host name.
-func Validate(email string) error {
-	if len(email) < 6 || len(email) > 254 {
-		return ErrInvalidFormat
+func Validate(email string) (err error) {
+	err = ValidateFast(email)
+	if err != nil {
+		return err
 	}
 
 	at := strings.LastIndex(email, "@")
-	if at <= 0 || at > len(email)-3 {
-		return ErrInvalidFormat
-	}
-
-	user := email[:at]
 	host := email[at+1:]
-
-	if len(user) > 64 {
-		return ErrInvalidFormat
-	}
-	if userDotRegexp.MatchString(user) || !userRegexp.MatchString(user) || !hostRegexp.MatchString(host) {
-		return ErrInvalidFormat
-	}
 
 	switch host {
 	case "localhost", "example.com":
@@ -56,7 +46,7 @@ func Validate(email string) error {
 }
 
 // ValidateFast checks format of a given email.
-func ValidateFast(email string) error {
+func ValidateFast(email string) (err error) {
 	if len(email) < 6 || len(email) > 254 {
 		return ErrInvalidFormat
 	}
@@ -72,7 +62,8 @@ func ValidateFast(email string) error {
 	if len(user) > 64 {
 		return ErrInvalidFormat
 	}
-	if !userRegexp.MatchString(user) || !hostRegexp.MatchString(host) {
+
+	if userDotRegexp.MatchString(user) || !userRegexp.MatchString(user) || !hostRegexp.MatchString(host) {
 		return ErrInvalidFormat
 	}
 
