@@ -1,10 +1,8 @@
-package emailx_test
+package emailx
 
 import (
 	"fmt"
 	"testing"
-
-	"github.com/goware/emailx"
 )
 
 func TestValidate(t *testing.T) {
@@ -40,7 +38,7 @@ func TestValidate(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		err := emailx.Validate(tt.in)
+		err := Validate(tt.in)
 		if err != nil {
 			if !tt.err {
 				t.Errorf(`"%s": unexpected error \"%v\"`, tt.in, err)
@@ -55,15 +53,15 @@ func TestValidate(t *testing.T) {
 }
 
 func ExampleValidate() {
-	err := emailx.Validate("My+Email@wrong.example.com")
+	err := Validate("My+Email@wrong.example.com")
 	if err != nil {
 		fmt.Println("Email is not valid.")
 
-		if err == emailx.ErrInvalidFormat {
+		if err == ErrInvalidFormat {
 			fmt.Println("Wrong format.")
 		}
 
-		if err == emailx.ErrUnresolvableHost {
+		if err == ErrUnresolvableHost {
 			fmt.Println("Unresolvable host.")
 		}
 	}
@@ -82,7 +80,7 @@ func TestNormalize(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		normalized := emailx.Normalize(tt.in)
+		normalized := Normalize(tt.in)
 		if normalized != tt.out {
 			t.Errorf(`%v: got "%v", want "%v"`, tt.in, normalized, tt.out)
 		}
@@ -90,6 +88,6 @@ func TestNormalize(t *testing.T) {
 }
 
 func ExampleNormalize() {
-	fmt.Println(emailx.Normalize(" Email+Me@example.com. "))
+	fmt.Println(Normalize(" Email+Me@example.com. "))
 	// Output: email+me@example.com
 }
