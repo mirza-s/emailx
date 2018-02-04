@@ -23,6 +23,12 @@ func TestValidate(t *testing.T) {
 		{in: "email@at@example.com", err: true},
 		{in: "some whitespace@example.com", err: true},
 		{in: "email@whitespace example.com", err: true},
+		{in: "abc@.example.com", err: true},
+		{in: "abc@.", err: true},
+		{in: "abc@example..com", err: true},
+		{in: "abc@----", err: true},
+		{in: "abc@1", err: true},
+		{in: "a@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", err: true},
 		{in: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com", err: true},
 		{in: "email@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.com", err: true},
 
@@ -35,6 +41,7 @@ func TestValidate(t *testing.T) {
 		{in: "email+extra@example.com"},
 		{in: "EMAIL@aol.co.uk"},
 		{in: "EMAIL+EXTRA@aol.co.uk"},
+		{in: "abc_def@localhost"},
 	}
 
 	for _, tt := range tests {

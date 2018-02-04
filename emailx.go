@@ -15,7 +15,8 @@ var (
 	ErrUnresolvableHost = errors.New("unresolvable host")
 
 	userRegexp = regexp.MustCompile("^[a-zA-Z0-9!#$%&'*+/=?^_`{|}~.-]+$")
-	hostRegexp = regexp.MustCompile("^[^\\s]+\\.[^\\s]+$")
+	//hostRegexp = regexp.MustCompile("^[^\\s]+\\.[^\\s]+$")
+	hostRegexp = regexp.MustCompile(`^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$`)
 
 	// As per RFC 5332 secion 3.2.3: https://tools.ietf.org/html/rfc5322#section-3.2.3
 	// Dots are not allowed in the beginning, end or in occurrences of more than 1 in the email address
@@ -58,7 +59,8 @@ func Validate(email string) (err error) {
 
 // ValidateFast checks format of a given email.
 func ValidateFast(email string) (err error) {
-	if len(email) < 6 || len(email) > 254 {
+	// max64@max255
+	if len(email) < 6 || len(email) > 64+255 {
 		return ErrInvalidFormat
 	}
 
@@ -71,6 +73,10 @@ func ValidateFast(email string) (err error) {
 	host := email[at+1:]
 
 	if len(user) > 64 {
+		return ErrInvalidFormat
+	}
+
+	if len(host) > 255 {
 		return ErrInvalidFormat
 	}
 
